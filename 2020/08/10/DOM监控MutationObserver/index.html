@@ -1,0 +1,315 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DOM监控MutationObserver | 木瓜太香</title><meta name="description" content="DOM监控MutationObserver"><meta name="keywords" content="DOM监控"><meta name="author" content="木瓜太香"><meta name="copyright" content="木瓜太香"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="http://autumn-one.gitee.io/blog/2020/08/10/DOM%E7%9B%91%E6%8E%A7MutationObserver/"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="DOM监控MutationObserver"><meta property="og:url" content="http://autumn-one.gitee.io/blog/2020/08/10/DOM%E7%9B%91%E6%8E%A7MutationObserver/"><meta property="og:site_name" content="木瓜太香"><meta property="og:description" content="DOM监控MutationObserver"><meta property="og:image" content="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/a41e4836cc59458b9716183dbf90b353_2020_08_10_14h_15m_32s_276ms_rda9.jpeg"><meta property="article:published_time" content="2020-08-10T06:16:48.000Z"><meta property="article:modified_time" content="2020-08-10T06:19:03.234Z"><meta name="twitter:card" content="summary"><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#000')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fff')
+  }
+}
+
+var getCookies = function (name) {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop().split(';').shift()
+}
+
+var autoChangeMode = 'false'
+var t = getCookies('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (Cookies.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap"><script>var GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: {"bookmark":{"message_prev":"按","message_next":"键将本页加入书签"},"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false    
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2020-08-10 14:19:03'
+}</script><noscript><style>
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><style type="text/css">#toggle-sidebar {bottom: 80px;}</style><meta name="generator" content="Hexo 5.0.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/b-ssl.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/blog/archives/"><div class="headline">文章</div><div class="length_num">6</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/blog/tags/"><div class="headline">标签</div><div class="length_num">7</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/blog/categories/"><div class="headline">分类</div><div class="length_num">3</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://blog-1252270016.cos.ap-chengdu.myqcloud.com/a41e4836cc59458b9716183dbf90b353_2020_08_10_14h_15m_32s_276ms_rda9.jpeg)"><nav id="nav"><span class="pull-left" id="blog_name"><a class="blog_title" id="site-name" href="/blog/">木瓜太香</a></span><span class="pull-right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">DOM监控MutationObserver</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-08-10T06:16:48.000Z" title="发表于 2020-08-10 14:16:48">2020-08-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-08-10T06:19:03.234Z" title="更新于 2020-08-10 14:19:03">2020-08-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/js/">js</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p><strong><code>MutationObserver </code>接口提供了监视DOM树更改的能力，是旧的 <code>Mutation</code> 的替代品</strong></p>
+<p>使用方式：通过 <code>MutationObserver</code>构造函数创建对象 <code>ob</code>，该对象下有以下可用方法</p>
+<ul>
+<li>observe(dom对象,option) ：配置<code>MutationObserver</code>在DOM更改匹配给定选项时，通过其回调函数开始接受通知</li>
+<li>disconnect()：取消监控</li>
+<li>takeRecords()：从<code>MutationObserver</code>的通知队列中删除所有待处理的通知，并将它们返回到 <code>MutationRecord</code>对象的新<code>Array</code>中</li>
+</ul>
+<p><strong>一个简单的示例</strong></p>
+<p>html部分</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;container&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span> <span class="attr">class</span>=<span class="string">&quot;title&quot;</span>&gt;</span>一个标题<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> <span class="attr">class</span>=<span class="string">&quot;btn&quot;</span>&gt;</span>点击按钮取消监控<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>javascript部分</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">,    <span class="keyword">let</span> container = <span class="built_in">document</span>.querySelector(<span class="string">&#x27;.container&#x27;</span>);</span><br><span class="line">    <span class="keyword">let</span> btn = <span class="built_in">document</span>.querySelector(<span class="string">&#x27;.btn&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    btn.onclick = <span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">&#x27;监控已经取消&#x27;</span>);</span><br><span class="line">        observer.disconnect();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">callback</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">&quot;回调函数参数&quot;</span>);</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="built_in">arguments</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> observer = <span class="keyword">new</span> MutationObserver(callback);</span><br><span class="line"></span><br><span class="line">    observer.observe(container,&#123;</span><br><span class="line">        attributes: <span class="literal">true</span> <span class="comment">// 指定元素属性改变的时候触发回调</span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>详解 observe disconnect takeRecords</code></strong></p>
+<ul>
+<li><p>observe 方法主要指定要监控哪些 DOM 的变化作为第一个参数传入，和要监控哪些地方，使用一个对象描述并作为第二个参数传入</p>
+<ul>
+<li><p>参数一: 要观察的 DOM 或者要观察的所有子节点的公共根节点</p>
+<ul>
+<li>参数二：一个可选的 <code>MutationObserverInit</code>对象，此对象的配置项描述了 DOM 的哪些变化要被监控，注意：<code>childList</code>，<code>attributes</code> 或者 <code>characterData</code> 三个属性之中，至少有一个必须为 <code>true</code>，否则会抛出 <code>TypeError</code> 异常，实际有<code>attributeFilter</code>也行</li>
+</ul>
+</li>
+<li><p><code>MutationObserverInit 对象属性</code></p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>attributeFilter</td>
+<td align="left">要监视的特定属性名称的数组。如果未包含此属性，则对所有属性的更改都会触发变动通知。无默认值。</td>
+</tr>
+<tr>
+<td>attributeOldValue</td>
+<td align="left">当监视节点的属性改动时，将此属性设为 <code>true</code> 将记录任何有改动的属性的上一个值。有关观察属性更改和值记录的详细信息，详见<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver#Monitoring_attribute_values">Monitoring attribute values</a> in <a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver">MutationObserver</a>。无默认值。</td>
+</tr>
+<tr>
+<td>attributes</td>
+<td align="left">设为 <code>true</code> 以观察受监视元素的属性值变更。默认值为 <code>false</code>。</td>
+</tr>
+<tr>
+<td>characterData</td>
+<td align="left">设为 <code>true</code> 以监视指定目标节点或子节点树中节点所包含的字符数据的变化。无默认值。在监控该类值的时候，传入observe的第一个参数应该是 textNode 而非 element ，不然就需要配合 subtree 使用</td>
+</tr>
+<tr>
+<td>characterDataOldValue</td>
+<td align="left">设为 <code>true</code> 以在文本在受监视节点上发生更改时记录节点文本的先前值。详情及例子，请查看 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserver#Monitoring_text_content_changes">Monitoring text content changes</a> in <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserver">MutationObserver</a>。无默认值。</td>
+</tr>
+<tr>
+<td>childList</td>
+<td align="left">设为 <code>true</code> 以监视目标节点（如果 <code>subtree</code> 为 <code>true</code>，则包含子孙节点）添加或删除新的子节点。默认值为 <code>false</code>。</td>
+</tr>
+<tr>
+<td>subtree</td>
+<td align="left">设为 <code>true</code> 以将监视范围扩展至目标节点整个节点树中的所有节点。<code>MutationObserverInit</code> 的其他值也会作用于此子树下的所有节点，而不仅仅只作用于目标节点。默认值为 <code>false</code>。</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>重复的 observe 调用后面会覆盖前面，前提是第一个参数是相同的，实质上只覆盖了要监控的类型也就是第二个参数</p>
+</li>
+</ul>
+</li>
+<li><p>disconnect 方法移除监控，如果某个元素从 dom 树中移除那么 MutationObserve 将同样被删除</p>
+</li>
+<li><p>takeRecords 方法返回已检测到但尚未由观察者的回调函数处理的所有匹配DOM更改的列表，使变更队列保持为空。 此方法最常见的使用场景是在断开观察者之前立即获取所有未处理的更改记录，以便在停止观察者时可以处理任何未处理的更改。该方法通常是程序级别的监控，例如设置监控之后立马修改然后调用该方法就可以获取到信息</p>
+  <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> observer = <span class="keyword">new</span> MutationObserver(callback);</span><br><span class="line"></span><br><span class="line"><span class="comment">// console.log(container.childNodes);</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">observer.observe(container.childNodes[<span class="number">0</span>], &#123;</span><br><span class="line">    <span class="comment">// attributes: true,</span></span><br><span class="line">    characterData: <span class="literal">true</span>,</span><br><span class="line">    characterDataOldValue: <span class="literal">true</span>,</span><br><span class="line">    <span class="comment">// childList: true,</span></span><br><span class="line">    <span class="comment">// subtree: true</span></span><br><span class="line">    <span class="comment">// attributeFilter: [&quot;class&quot;,&quot;data-username&quot;],</span></span><br><span class="line">    <span class="comment">// attributeOldValue: true</span></span><br><span class="line">&#125;)</span><br><span class="line">    </span><br><span class="line">container.childNodes[<span class="number">0</span>].textContent = <span class="string">&quot;哈哈哈123&quot;</span></span><br><span class="line"><span class="built_in">console</span>.log(observer.takeRecords());</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<p><strong>监控到变化之后获取信息：</strong></p>
+<p>只监控变化没有用，重要的是我们要知道哪里变了，通常我们可以拿到变化前的老值，新值可以通过具体dom对象获取，关于信息回调函数参数中的 MutationRecord 对象很重要</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MutationRecord.type</td>
+<td>如果是属性变化，则返回 <code>&quot;attributes&quot;</code>；<br/>如果是 <code>characterData</code> 节点变化，则返回 <code>&quot;characterData&quot;</code>；<br/>如果是子节点树 <code>childList</code> 变化，则返回 <code>&quot;childList&quot;</code>。</td>
+</tr>
+<tr>
+<td>MutationRecord.target</td>
+<td>根据 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/MutationRecord/type"><code>MutationRecord.type</code></a>，返回变化所影响的节点。<br/>对于属性 <code>attributes</code> 变化，返回属性变化的节点。<br/>对于 <code>characterData</code> 变化，返回 <code>characterData</code> 节点。<br/>对于子节点树 <code>childList</code> 变化，返回子节点变化的节点。</td>
+</tr>
+<tr>
+<td>MutationRecord.addedNodes</td>
+<td>返回被添加的节点。<br/>如果没有节点被添加，则该属性将是一个空的 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/NodeList"><code>NodeList</code></a>。</td>
+</tr>
+<tr>
+<td>MutationRecord.removedNodes</td>
+<td>返回被移除的节点。<br/>如果没有节点被移除，则该属性将是一个空的 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/NodeList"><code>NodeList</code></a>。</td>
+</tr>
+<tr>
+<td>MutationRecord.previousSibling</td>
+<td>返回被添加或移除的节点之前的兄弟节点，或者 <code>null</code>。</td>
+</tr>
+<tr>
+<td>MutationRecord.nextSibling</td>
+<td>返回被添加或移除的节点之后的兄弟节点，或者 <code>null</code>。</td>
+</tr>
+<tr>
+<td>MutationRecord.attributeName</td>
+<td>返回被修改的属性的属性名，或者 <code>null</code>。</td>
+</tr>
+<tr>
+<td>MutationRecord.attributeNamespace</td>
+<td>返回被修改属性的命名空间，或者 <code>null</code>。</td>
+</tr>
+<tr>
+<td>MutationRecord.oldValue</td>
+<td>返回值取决于 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/MutationRecord/type"><code>MutationRecord.type</code></a>。 对于属性 <code>attributes</code> 变化，返回变化之前的属性值。 对于 <code>characterData</code> 变化，返回变化之前的数据。 对于子节点树 <code>childList</code> 变化，返回 <code>null</code>。<br />注意，如果要让这个属性起作用，在相应的 <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserverInit">MutationObserverInit</a> 参数的 <code>MutationObserver</code> <a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/MutationObserver/observe">observe</a> 方法中，<code>attributeOldValue</code> 或者 <code>characterDataOldValue</code> 必须设置为 <code>true</code>。</td>
+</tr>
+</tbody></table>
+<p><strong>特别注意：</strong>所有被监控到的更改，其记录的 target 信息都是具体被更改的那个节点对象，如果被更改的是 文本 那么 target 就是一个文本节点。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">木瓜太香</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://autumn-one.gitee.io/blog/2020/08/10/DOM%E7%9B%91%E6%8E%A7MutationObserver/">http://autumn-one.gitee.io/blog/2020/08/10/DOM监控MutationObserver/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://autumn-one.gitee.io/blog" target="_blank">木瓜太香</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/js/">js</a></div><div class="post_share"><div class="social-share" data-image="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/a41e4836cc59458b9716183dbf90b353_2020_08_10_14h_15m_32s_276ms_rda9.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/mm_facetoface_collect_qrcode_1596880105715.png" target="_blank"><img class="post-qr-code-img" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/mm_facetoface_collect_qrcode_1596880105715.png" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/1596880086.jpg" target="_blank"><img class="post-qr-code-img" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/1596880086.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/blog/2019/09/14/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E9%92%B1%E4%BA%BA%E4%B8%8D%E5%A8%B6%E7%BE%8E%E5%A5%B3/"><img class="next-cover" data-lazy-src="http://autumn-one.gitee.io/static/blog_images/为什么有钱人不娶美女.jpg" onerror="onerror=null;src='/blog/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">为什么有钱人不娶美女</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/blog/2019/08/02/原生JS实现JQuery链式调用/" title="原生JS实现JQuery链式调用"><img class="relatedPosts_cover" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/c293a26b9ea545fb8bd2006c3c011544.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-02</div><div class="relatedPosts_title">原生JS实现JQuery链式调用</div></div></a></div><div class="relatedPosts_item"><a href="/blog/2019/07/21/Js块级绑定/" title="Js块级绑定"><img class="relatedPosts_cover" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/content.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-21</div><div class="relatedPosts_title">Js块级绑定</div></div></a></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 By 木瓜太香</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>web 前端</span></div><div class="footer_custom_text">Hi, welcome to my <a href="http://autumn-one.gitee.io/blog">blog</a>!</div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font_plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font_minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module" defer></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js" async></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script src="/blog/js/search/local-search.js"></script><script>var endLoading = function () {
+  document.body.style.overflow = 'auto';
+  document.getElementById('loading-box').classList.add("loaded")
+}
+window.addEventListener('load',endLoading)</script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div class="aplayer no-destroy" style="display:none;" data-id="4174875" data-server="netease" data-type="playlist" data-mini="true" data-fixed="true" data-mini="true" data-lrctype="1" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><script src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/musicControl_2020_08_09_18h_02m_09s_890ms_r92c.js"></script><canvas class="fireworks"></canvas><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="/blog/js/third-party/fireworks.js"></script><script defer="defer" id="ribbon" src="/blog/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="false"></script><script src="/blog/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script>window.$crisp = [];
+window.CRISP_WEBSITE_ID = "e0e8a06a-7957-4879-b27b-2a43c151c886";
+(function () {
+  d = document;
+  s = d.createElement("script");
+  s.src = "https://client.crisp.chat/l.js";
+  s.async = 1;
+  d.getElementsByTagName("head")[0].appendChild(s);
+})();
+$crisp.push(["safe", true])
+
+if (true) {
+  $crisp.push(["do", "chat:hide"])
+  $crisp.push(["on", "chat:closed", function() {
+    $crisp.push(["do", "chat:hide"])
+  }])
+  var chatBtnFn = () => {
+    var chatBtn = document.getElementById("chat_btn")
+    chatBtn.addEventListener("click", function(){
+      $crisp.push(["do", "chat:show"])
+      $crisp.push(["do", "chat:open"])
+
+    });
+  }
+  chatBtnFn()
+} else {
+  if (false) {
+    function chatBtnHide () {
+      $crisp.push(["do", "chat:hide"])
+    }
+    function chatBtnShow () {
+      $crisp.push(["do", "chat:show"])
+    }
+  }
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/gh/metowolf/MetingJS@1.2/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: [
+    'title',
+    'meta[name=description]',
+    '#config_change',
+    '#body-wrap',
+    '#rightside-config-hide',
+    '#rightside-config-show',
+    '.js-pjax'
+  ],
+  cacheBust: false,
+})
+
+document.addEventListener('pjax:complete', function () {
+  refreshFn()
+
+  $('script[data-pjax]').each(function () {
+    $(this).parent().append($(this).remove())
+  })
+
+  GLOBAL_CONFIG.islazyload && lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', '', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+})
+
+document.addEventListener('pjax:send', function () {
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  $(window).off('scroll')
+
+  //reset readmode
+  $('body').hasClass('read-mode') && $('body').removeClass('read-mode')
+
+  //reset font-size
+  $('body').css('font-size') !== originFontSize && $('body').css('font-size', parseFloat(originFontSize))
+})</script></div></body></html>
