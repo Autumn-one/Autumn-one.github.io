@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Google V8引擎 垃圾回收机制 | 木瓜太香</title><meta name="description" content="Google V8引擎 垃圾回收机制 V8的两个垃圾回收器是如何工作的"><meta name="keywords" content="Google V8引擎 垃圾回收机制"><meta name="author" content="木瓜太香"><meta name="copyright" content="木瓜太香"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/blog/img/favicon.png"><link rel="canonical" href="http://autumn-one.gitee.io/blog/2020/08/16/Google-V8%E5%BC%95%E6%93%8E-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Google V8引擎 垃圾回收机制"><meta property="og:url" content="http://autumn-one.gitee.io/blog/2020/08/16/Google-V8%E5%BC%95%E6%93%8E-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/"><meta property="og:site_name" content="木瓜太香"><meta property="og:description" content="Google V8引擎 垃圾回收机制 V8的两个垃圾回收器是如何工作的"><meta property="og:image" content="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/999ada8e63094b09a8ff927a257c6777_2020_08_16_22h_02m_26s_241ms_rdd3.jpeg"><meta property="article:published_time" content="2020-08-16T13:13:56.000Z"><meta property="article:modified_time" content="2020-08-16T14:03:38.398Z"><meta name="twitter:card" content="summary"><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#000')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fff')
+  }
+}
+
+var getCookies = function (name) {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop().split(';').shift()
+}
+
+var autoChangeMode = 'false'
+var t = getCookies('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (Cookies.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap"><script>var GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: {"bookmark":{"message_prev":"按","message_next":"键将本页加入书签"},"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false    
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-08-16 22:03:38'
+}</script><noscript><style>
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><style type="text/css">#toggle-sidebar {bottom: 80px;}</style><meta name="generator" content="Hexo 5.0.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/b-ssl.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/blog/archives/"><div class="headline">文章</div><div class="length_num">7</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/blog/tags/"><div class="headline">标签</div><div class="length_num">9</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/blog/categories/"><div class="headline">分类</div><div class="length_num">3</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E6%95%B0%E6%8D%AE%E6%98%AF%E6%80%8E%E4%B9%88%E4%BA%A7%E7%94%9F%E7%9A%84%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">垃圾数据是怎么产生的？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">垃圾回收算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%AF%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">副垃圾回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">主垃圾回收器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://blog-1252270016.cos.ap-chengdu.myqcloud.com/999ada8e63094b09a8ff927a257c6777_2020_08_16_22h_02m_26s_241ms_rdd3.jpeg)"><nav id="nav"><span class="pull-left" id="blog_name"><a class="blog_title" id="site-name" href="/blog/">木瓜太香</a></span><span class="pull-right menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/blog/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/blog/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/blog/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 关于我</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Google V8引擎 垃圾回收机制</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-08-16T13:13:56.000Z" title="发表于 2020-08-16 21:13:56">2020-08-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-08-16T14:03:38.398Z" title="更新于 2020-08-16 22:03:38">2020-08-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/js/">js</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p>我们都知道，JavaScript 是一门自动垃圾回收的语言，也就是说，我们不需要去手动回收垃圾数据，这一切都交给 V8 的垃圾回收器来完成。V8 为了更高效地回收垃圾，引入了两个垃圾回收器，它们分别针对着不同的场景。</p>
+<p>那这两个回收器究竟是如何工作的呢，这节课我们就来分析这个问题。</p>
+</blockquote>
+<h2 id="垃圾数据是怎么产生的？"><a href="#垃圾数据是怎么产生的？" class="headerlink" title="垃圾数据是怎么产生的？"></a>垃圾数据是怎么产生的？</h2><p>首先，我们看看垃圾数据是怎么产生的。</p>
+<p>无论是使用什么语言，我们都会频繁地使用数据，这些数据会被存放到栈和堆中，通常的方式是在内存中创建一块空间，使用这块空间，在不需要的时候回收这块空间。</p>
+<p>比如下面这样一句代码：</p>
+<p>window.test = new Object()</p>
+<p>window.test.a = new Uint16Array(100)</p>
+<p>当 JavaScript 执行这段代码的时候，会先为 window 对象添加一个 test 属性，并在堆中创建了一个空对象，并将该对象的地址指向了 window.test 属性。随后又创建一个大小为 100 的数组，并将属性地址指向了 test.a 的属性值。此时的内存布局图如下所示：</p>
+<p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/42b70203c6da641831d778ce08a7a5b1_2020_08_16_21h_59m_10s_888ms_r13a.jpeg" alt="img"></p>
+<p>我们可以看到，栈中保存了指向 window 对象的指针，通过栈中 window 的地址，我们可以到达 window 对象，通过 window 对象可以到达 test 对象，通过 test 对象还可以到达 a 对象。</p>
+<p>如果此时，我将另外一个对象赋给了 a 属性，代码如下所示：</p>
+<p>window.test.a = new Object()</p>
+<p>那么此时的内存布局如下所示：</p>
+<p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/9c44e8bb2a75a8da72877c8a192967dc_2020_08_16_21h_59m_38s_519ms_r509.jpeg" alt="img"></p>
+<p>我们可以看到，a 属性之前是指向堆中数组对象的，现在已经指向了另外一个空对象，那么此时堆中的数组对象就成为了垃圾数据，因为我们无法从一个根对象遍历到这个 Array 对象。</p>
+<p>不过，你不用担心这个数组对象会一直占用内存空间，因为 V8 虚拟机中的垃圾回收器会帮你自动清理。</p>
+<h2 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h2><p>那么垃圾回收是怎么实现的呢？大致可以分为以下几个步骤：</p>
+<p>第一步，通过 GC Root 标记空间中<strong>活动对象</strong>和<strong>非活动对象</strong>。</p>
+<p>目前 V8 采用的<strong>可访问性（reachability）算法</strong>来判断堆中的对象是否是活动对象。具体地讲，这个算法是将一些 <strong>GC Root</strong> 作为初始存活的对象的集合，从 GC Roots 对象出发，遍历 GC Root 中的所有对象：</p>
+<p>通过 GC Root 遍历到的对象，我们就认为该对象是<strong>可访问的（reachable）</strong>，那么必须保证这些对象应该在内存中保留，我们也称可访问的对象为活动对象；</p>
+<p>通过 GC Roots 没有遍历到的对象，则是<strong>不可访问的（unreachable）</strong>，那么这些不可访问的对象就可能被回收，我们称不可访问的对象为非活动对象。</p>
+<p>在浏览器环境中，GC Root 有很多，通常包括了以下几种 (但是不止于这几种)：</p>
+<p>全局的 window 对象（位于每个 iframe 中）；</p>
+<p>文档 DOM 树，由可以通过遍历文档到达的所有原生 DOM 节点组成；</p>
+<p>存放栈上变量。</p>
+<p>第二步，回收非活动对象所占据的内存。其实就是在所有的标记完成之后，统一清理内存中所有被标记为可回收的对象。</p>
+<p>第三步，做内存整理。一般来说，频繁回收对象后，内存中就会存在大量不连续空间，我们把这些不连续的内存空间称为<strong>内存碎片</strong>。当内存中出现了大量的内存碎片之后，如果需要分配较大的连续内存时，就有可能出现内存不足的情况，所以最后一步需要整理这些内存碎片。但这步其实是可选的，因为有的垃圾回收器不会产生内存碎片，比如接下来我们要介绍的副垃圾回收器。</p>
+<p>以上就是大致的垃圾回收的流程。目前 V8 采用了两个垃圾回收器，<strong>主垃圾回收器 -Major GC 和副垃圾回收器 -Minor GC (Scavenger)**。V8 之所以使用了两个垃圾回收器，主要是受到了</strong>代际假说（The Generational Hypothesis）**的影响。</p>
+<p>代际假说是垃圾回收领域中一个重要的术语，它有以下两个特点：</p>
+<p>第一个是大部分对象都是“朝生夕死”的，也就是说大部分对象在内存中存活的时间很短，比如函数内部声明的变量，或者块级作用域中的变量，当函数或者代码块执行结束时，作用域中定义的变量就会被销毁。因此这一类对象一经分配内存，很快就变得不可访问；</p>
+<p>第二个是不死的对象，会活得更久，比如全局的 window、DOM、Web API 等对象。</p>
+<p>其实这两个特点不仅仅适用于 JavaScript，同样适用于大多数的编程语言，如 Java、Python 等。</p>
+<p>V8 的垃圾回收策略，就是建立在该假说的基础之上的。接下来，我们来分析下 V8 是如何实现垃圾回收的。</p>
+<p>如果我们只使用一个垃圾回收器，在优化大多数新对象的同时，就很难优化到那些老对象，因此你需要权衡各种场景，根据对象生存周期的不同，而使用不同的算法，以便达到最好的效果。</p>
+<p>所以，在 V8 中，会把堆分为新生代和老生代两个区域，<strong>新生代中存放的是生存时间短的对象，老生代中存放生存时间久的对象</strong>。</p>
+<p>新生代通常只支持 1～8M 的容量，而老生代支持的容量就大很多了。对于这两块区域，V8 分别使用两个不同的垃圾回收器，以便更高效地实施垃圾回收。</p>
+<p><strong>副垃圾回收器 -Minor GC (Scavenger)，主要负责新生代的垃圾回收。</strong></p>
+<p><strong>主垃圾回收器 -Major GC，主要负责老生代的垃圾回收。</strong></p>
+<h2 id="副垃圾回收器"><a href="#副垃圾回收器" class="headerlink" title="副垃圾回收器"></a>副垃圾回收器</h2><p>副垃圾回收器主要负责新生代的垃圾回收。通常情况下，大多数小的对象都会被分配到新生代，所以说这个区域虽然不大，但是垃圾回收还是比较频繁的。</p>
+<p>新生代中的垃圾数据用 <strong>Scavenge 算法</strong>来处理。所谓 Scavenge 算法，是把新生代空间对半划分为两个区域，一半是<strong>对象区域 (from-space)**，一半是</strong>空闲区域 (to-space)**，如下图所示：</p>
+<p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/75329eceafd88573097f8d073430bc9d_2020_08_16_21h_59m_48s_792ms_r03a.jpeg" alt="img"></p>
+<p>新生区要划分为对象区域和空闲区域</p>
+<p>新加入的对象都会存放到对象区域，当对象区域快被写满时，就需要执行一次垃圾清理操作。</p>
+<p>在垃圾回收过程中，首先要对对象区域中的垃圾做标记；标记完成之后，就进入垃圾清理阶段。副垃圾回收器会把这些存活的对象复制到空闲区域中，同时它还会把这些对象有序地排列起来，所以这个复制过程，也就相当于完成了内存整理操作，复制后空闲区域就没有内存碎片了。</p>
+<p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/12519a0d1f2484cd24297e821f2f1887_2020_08_16_21h_59m_54s_259ms_r7fe.jpeg" alt="img"></p>
+<p>完成复制后，对象区域与空闲区域进行角色翻转，也就是原来的对象区域变成空闲区域，原来的空闲区域变成了对象区域。这样就完成了垃圾对象的回收操作，同时，<strong>这种角色翻转的操作还能让新生代中的这两块区域无限重复使用下去</strong>。</p>
+<p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/797db43b27c8a6add1ffa540910c7ebd_2020_08_16_21h_59m_59s_549ms_r420.jpeg" alt="img"></p>
+<p>不过，副垃圾回收器每次执行清理操作时，都需要将存活的对象从对象区域复制到空闲区域，复制操作需要时间成本，如果新生区空间设置得太大了，那么每次清理的时间就会过久，所以<strong>为了执行效率，一般新生区的空间会被设置得比较小</strong>。</p>
+<p>也正是因为新生区的空间不大，所以很容易被存活的对象装满整个区域，副垃圾回收器一旦监控对象装满了，便执行垃圾回收。同时，副垃圾回收器还会采用<strong>对象晋升策略</strong>，也就是移动那些经过两次垃圾回收依然还存活的对象到老生代中。</p>
+<h2 id="主垃圾回收器"><a href="#主垃圾回收器" class="headerlink" title="主垃圾回收器"></a>主垃圾回收器</h2><p>主垃圾回收器主要负责老生代中的垃圾回收。除了新生代中晋升的对象，一些大的对象会直接被分配到老生代里。因此，老生代中的对象有两个特点：</p>
+<p>一个是对象占用空间大；</p>
+<p>另一个是对象存活时间长。</p>
+<p>由于老生代的对象比较大，若要在老生代中使用 Scavenge 算法进行垃圾回收，复制这些大的对象将会花费比较多的时间，从而导致回收执行效率不高，同时还会浪费一半的空间。所以，主垃圾回收器是采用<strong>标记 - 清除（Mark-Sweep）</strong>的算法进行垃圾回收的。</p>
+<p>那么，标记 - 清除算法是如何工作的呢？</p>
+<p><strong>首先是标记过程阶段。</strong>标记阶段就是从一组根元素开始，递归遍历这组根元素，在这个遍历过程中，能到达的元素称为活动对象，没有到达的元素就可以判断为垃圾数据。</p>
+<p><strong>接下来就是垃圾的清除过程。</strong>它和副垃圾回收器的垃圾清除过程完全不同，主垃圾回收器会直接将标记为垃圾的数据清理掉。</p>
+<p>你可以理解这个过程是清除掉下图中红色标记数据的过程，你可参考下图大致理解下其清除过程：</p>
+<p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/c70cdb85c0b656061e4cc420efdaf59b_2020_08_16_22h_00m_05s_535ms_r7dd.jpeg" alt="img"></p>
+<p>标记清除过程</p>
+<p>对垃圾数据进行标记，然后清除，这就是<strong>标记 - 清除算法</strong>，不过对一块内存多次执行标记 - 清除算法后，会产生大量不连续的内存碎片。而碎片过多会导致大对象无法分配到足够的连续内存，于是又引入了另外一种算法——<strong>标记 - 整理（Mark-Compact）</strong>。</p>
+<p>这个算法的标记过程仍然与标记 - 清除算法里的是一样的，先标记可回收对象，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉这一端之外的内存。你可以参考下图：</p>
+<p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/6a558a6731fd68757e1a43c1dbc27ed8_2020_08_16_22h_00m_09s_185ms_r9be.jpeg" alt="img"></p>
+<p>标记整理过程</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>今天，我们先分析了什么是垃圾数据，从“GC Roots”对象出发，遍历 GC Root 中的所有对象，如果通过 GC Roots 没有遍历到的对象，则这些对象便是垃圾数据。V8 会有专门的垃圾回收器来回收这些垃圾数据。</p>
+<p>V8 依据代际假说，将堆内存划分为新生代和老生代两个区域，新生代中存放的是生存时间短的对象，老生代中存放生存时间久的对象。为了提升垃圾回收的效率，V8 设置了两个垃圾回收器，主垃圾回收器和副垃圾回收器。主垃圾回收器负责收集老生代中的垃圾数据，副垃圾回收器负责收集新生代中的垃圾数据。</p>
+<p>副垃圾回收器采用了 <strong>Scavenge 算法</strong>，是把新生代空间对半划分为两个区域，一半是<strong>对象区域</strong>，一半是<strong>空闲区域</strong>。新的数据都分配在对象区域，等待对象区域快分配满的时候，垃圾回收器便执行垃圾回收操作，之后将存活的对象从对象区域拷贝到空闲区域，并将两个区域互换。主垃圾回收器回收器主要负责老生代中的垃圾数据的回收操作，会经历标记、清除和整理过程。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">木瓜太香</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://autumn-one.gitee.io/blog/2020/08/16/Google-V8%E5%BC%95%E6%93%8E-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">http://autumn-one.gitee.io/blog/2020/08/16/Google-V8引擎-垃圾回收机制/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://autumn-one.gitee.io/blog" target="_blank">木瓜太香</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/js/">js</a><a class="post-meta__tags" href="/blog/tags/%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">底层原理</a><a class="post-meta__tags" href="/blog/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/">垃圾回收</a></div><div class="post_share"><div class="social-share" data-image="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/999ada8e63094b09a8ff927a257c6777_2020_08_16_22h_02m_26s_241ms_rdd3.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/mm_facetoface_collect_qrcode_1596880105715.png" target="_blank"><img class="post-qr-code-img" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/mm_facetoface_collect_qrcode_1596880105715.png" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/1596880086.jpg" target="_blank"><img class="post-qr-code-img" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/1596880086.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/blog/2020/08/10/DOM%E7%9B%91%E6%8E%A7MutationObserver/"><img class="next-cover" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/a41e4836cc59458b9716183dbf90b353_2020_08_10_14h_15m_32s_276ms_rda9.jpeg" onerror="onerror=null;src='/blog/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">DOM监控MutationObserver</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/blog/2020/08/10/DOM监控MutationObserver/" title="DOM监控MutationObserver"><img class="relatedPosts_cover" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/a41e4836cc59458b9716183dbf90b353_2020_08_10_14h_15m_32s_276ms_rda9.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="far fa-calendar-alt fa-fw"></i> 2020-08-10</div><div class="relatedPosts_title">DOM监控MutationObserver</div></div></a></div><div class="relatedPosts_item"><a href="/blog/2019/08/02/原生JS实现JQuery链式调用/" title="原生JS实现JQuery链式调用"><img class="relatedPosts_cover" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/c293a26b9ea545fb8bd2006c3c011544.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="far fa-calendar-alt fa-fw"></i> 2019-08-02</div><div class="relatedPosts_title">原生JS实现JQuery链式调用</div></div></a></div><div class="relatedPosts_item"><a href="/blog/2019/07/21/Js块级绑定/" title="Js块级绑定"><img class="relatedPosts_cover" data-lazy-src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/content.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="far fa-calendar-alt fa-fw"></i> 2019-07-21</div><div class="relatedPosts_title">Js块级绑定</div></div></a></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 By 木瓜太香</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>web 前端</span></div><div class="footer_custom_text">Hi, welcome to my <a href="http://autumn-one.gitee.io/blog">blog</a>!</div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font_plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font_minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module" defer></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js" async></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script src="/blog/js/search/local-search.js"></script><script>var endLoading = function () {
+  document.body.style.overflow = 'auto';
+  document.getElementById('loading-box').classList.add("loaded")
+}
+window.addEventListener('load',endLoading)</script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div class="aplayer no-destroy" style="display:none;" data-id="4174875" data-server="netease" data-type="playlist" data-mini="true" data-fixed="true" data-mini="true" data-lrctype="1" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><script src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/musicControl_2020_08_09_18h_02m_09s_890ms_r92c.js"></script><canvas class="fireworks"></canvas><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="/blog/js/third-party/fireworks.js"></script><script defer="defer" id="ribbon" src="/blog/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="false"></script><script src="/blog/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script>window.$crisp = [];
+window.CRISP_WEBSITE_ID = "e0e8a06a-7957-4879-b27b-2a43c151c886";
+(function () {
+  d = document;
+  s = d.createElement("script");
+  //- 聊天窗口官网的 JS 文件 访问较慢 s.src = "https://client.crisp.chat/l.js";
+  window.addEventListener("load",function(){
+    s.src = "https://blog-1252270016.cos.ap-chengdu.myqcloud.com/l_2020_08_10_14h_39m_18s_107ms_r95c.js"
+  },false);
+  s.async = 1;
+  d.getElementsByTagName("head")[0].appendChild(s);
+})();
+$crisp.push(["safe", true])
+
+if (true) {
+  $crisp.push(["do", "chat:hide"])
+  $crisp.push(["on", "chat:closed", function() {
+    $crisp.push(["do", "chat:hide"])
+  }])
+  var chatBtnFn = () => {
+    var chatBtn = document.getElementById("chat_btn")
+    chatBtn.addEventListener("click", function(){
+      $crisp.push(["do", "chat:show"])
+      $crisp.push(["do", "chat:open"])
+
+    });
+  }
+  chatBtnFn()
+} else {
+  if (false) {
+    function chatBtnHide () {
+      $crisp.push(["do", "chat:hide"])
+    }
+    function chatBtnShow () {
+      $crisp.push(["do", "chat:show"])
+    }
+  }
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/gh/metowolf/MetingJS@1.2/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: [
+    'title',
+    'meta[name=description]',
+    '#config_change',
+    '#body-wrap',
+    '#rightside-config-hide',
+    '#rightside-config-show',
+    '.js-pjax'
+  ],
+  cacheBust: false,
+})
+
+document.addEventListener('pjax:complete', function () {
+  refreshFn()
+
+  $('script[data-pjax]').each(function () {
+    $(this).parent().append($(this).remove())
+  })
+
+  GLOBAL_CONFIG.islazyload && lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', '', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+})
+
+document.addEventListener('pjax:send', function () {
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  $(window).off('scroll')
+
+  //reset readmode
+  $('body').hasClass('read-mode') && $('body').removeClass('read-mode')
+
+  //reset font-size
+  $('body').css('font-size') !== originFontSize && $('body').css('font-size', parseFloat(originFontSize))
+})</script></div></body></html>
