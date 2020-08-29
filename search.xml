@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>css混合模式(blend-mode)</title>
+      <link href="/blog/2020/08/29/css%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F-blend-mode/"/>
+      <url>/blog/2020/08/29/css%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F-blend-mode/</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>今天要说的是 <blend-mode> 其是一中 css 数据类型，用于描述当前元素重叠时，颜色应当如何呈现。它被用于 <code>background-blend-mode</code> 和 <code>mix-blend-mode</code> 属性。</p><p>当层重叠时，例如：同一元素设置多个背景图、父子元素的重叠。这时混合模式就是计算像素最终颜色值的方法。</p></blockquote><h2 id="background-blend-mode-属性"><a href="#background-blend-mode-属性" class="headerlink" title="background-blend-mode 属性"></a>background-blend-mode 属性</h2><p>该属性主要用于设置背景的混合模式，我们都知道背景颜色其实可以设置多个图片，或者多个图片加上单个纯颜色值，而这些图片与颜色值其实是层叠在一起的，通过这个属性我们可以将它们进行不同方式的融合，呈现出其他的颜色。</p><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.box</span>&#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="number">400px</span>;</span><br><span class="line">    <span class="attribute">height</span>: <span class="number">400px</span>;</span><br><span class="line">    <span class="attribute">border</span>: <span class="number">1px</span> solid pink;</span><br><span class="line">    <span class="attribute">background</span>: <span class="number">200px</span> <span class="number">19px</span>/<span class="number">200px</span> <span class="built_in">url</span>(<span class="string">&quot;./meinv.jpg&quot;</span>) no-repeat, <span class="number">0px</span>/ cover <span class="built_in">url</span>(<span class="string">&quot;./bg.jpg&quot;</span>) pink;</span><br><span class="line">    <span class="attribute">background-blend-mode</span>: darken;</span><br><span class="line">    <span class="comment">/*mix-blend-mode: normal;*/</span></span><br><span class="line">    <span class="attribute">font-size</span>: <span class="number">30px</span>;</span><br><span class="line">    <span class="attribute">font-weight</span>: <span class="number">700</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>效果如下图：</p><p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/image-20200829190933929_2020_08_29_19h_09m_43s_049ms_r5a7.png" alt="image-20200829190933929"></p><p>该属性是是一种更接近于 ps 能力的工具，需要相关专业的知识才能够好的进行调试，具体取值可以<a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/blend-mode">参考这里</a>。</p><h2 id="mix-blend-mode-属性"><a href="#mix-blend-mode-属性" class="headerlink" title="mix-blend-mode 属性"></a>mix-blend-mode 属性</h2><p>该属性描述了元素的内容应该与元素的直系父元素的内容和元素的背景如何混合。</p><p>使用该属性我们一般需要一种嵌套关系，我们可以将该属性设置在子元素上生成混合效果，具体取值可以<a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/mix-blend-mode">参考这里</a>。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> css </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> css </tag>
+            
+            <tag> 混合模式 </tag>
+            
+            <tag> blend-mode </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>几种取消Ajax请求的方法</title>
       <link href="/blog/2020/08/28/%E5%87%A0%E7%A7%8D%E5%8F%96%E6%B6%88Ajax%E8%AF%B7%E6%B1%82%E7%9A%84%E6%96%B9%E6%B3%95/"/>
       <url>/blog/2020/08/28/%E5%87%A0%E7%A7%8D%E5%8F%96%E6%B6%88Ajax%E8%AF%B7%E6%B1%82%E7%9A%84%E6%96%B9%E6%B3%95/</url>
