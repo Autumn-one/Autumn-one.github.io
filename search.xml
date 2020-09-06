@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>webstorm中emmet展开a标签和行内元素不换行</title>
+      <link href="/blog/2020/09/06/webstorm%E4%B8%ADemmet%E5%B1%95%E5%BC%80a%E6%A0%87%E7%AD%BE%E5%92%8C%E8%A1%8C%E5%86%85%E5%85%83%E7%B4%A0%E4%B8%8D%E6%8D%A2%E8%A1%8C/"/>
+      <url>/blog/2020/09/06/webstorm%E4%B8%ADemmet%E5%B1%95%E5%BC%80a%E6%A0%87%E7%AD%BE%E5%92%8C%E8%A1%8C%E5%86%85%E5%85%83%E7%B4%A0%E4%B8%8D%E6%8D%A2%E8%A1%8C/</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>大家好我是木瓜太香，大家在使用 webstorm 编写 html 的时候可能会遇到展开部分标签挨在一起的情况，相信很多小伙伴都想解决这个问题，接下来我们就开始吧！</p></blockquote><p>先来看看我们输入如下 emmet 代码的时候展开的效果是怎么样的</p><p><code>div&gt;a*3</code></p><p>展开效果：</p><p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/image-20200906221037752_2020_09_06_22h_10m_47s_198ms_r8d4_2020_09_06_22h_55m_45s_373ms_recf.png" alt="image-20200906221037752"></p><p>这个时候我们可能需要自己去一个一个回车排版，当然这肯定不是你想要的，现在我们来解决这个问题。</p><p>在解决问题之前，我们要知道产生这个问题的原因，在 webstorm 中是对标签进行分类的，其实从逻辑上来说，a 标签这种本身就属于行内标签，不换行在逻辑上是没有任何问题的，但是我们开发的时候经常需要根据情况来调整，因为很多时候 a 标签会写的很长，我们更希望换行来增加可读性。</p><p><strong>解决办法：</strong> 将 a 标签在 webstorm 中的分类变成非行内标签即可。</p><p><strong>设置路径：</strong>File | Settings | Editor | Code Style | HTML | Other</p><p>找到上述路径对应的页面之后，向下翻动，找到 <code>Inline elements</code> 这个选项，将右边输入框中的 a 标签删除掉，之后保存设置即可，其他的行内标签也是同样的修改方法。</p><p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/image-20200906221037752_2020_09_06_22h_10m_47s_198ms_r8d4_2020_09_06_22h_55m_45s_373ms_recf.png" alt="image-20200906221921697"></p><p>经过以上的修改我们最终展开的效果如下图：</p><p><img src="https://blog-1252270016.cos.ap-chengdu.myqcloud.com/image-20200906221037752_2020_09_06_22h_10m_47s_198ms_r8d4_2020_09_06_22h_55m_45s_373ms_recf.png" alt="image-20200906222102921"></p><p>好了这个问题到这里我们就解决了，如果大家有更多 webstorm 上的疑问，或者想学习更过 webstorm 相关的技巧，可以去哔哩哔哩搜索：木瓜太香 。（PS：目前应该是对 webstorm 做的最全的了）</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> webstorm </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> webstorm </tag>
+            
+            <tag> 前端 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>跨域中的option请求</title>
       <link href="/blog/2020/08/29/%E8%B7%A8%E5%9F%9F%E4%B8%AD%E7%9A%84option%E8%AF%B7%E6%B1%82/"/>
       <url>/blog/2020/08/29/%E8%B7%A8%E5%9F%9F%E4%B8%AD%E7%9A%84option%E8%AF%B7%E6%B1%82/</url>
