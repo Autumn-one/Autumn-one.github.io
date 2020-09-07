@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>vue组件加载闪烁问题</title>
+      <link href="/blog/2020/09/07/vue%E7%BB%84%E4%BB%B6%E5%8A%A0%E8%BD%BD%E9%97%AA%E7%83%81%E9%97%AE%E9%A2%98/"/>
+      <url>/blog/2020/09/07/vue%E7%BB%84%E4%BB%B6%E5%8A%A0%E8%BD%BD%E9%97%AA%E7%83%81%E9%97%AE%E9%A2%98/</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>大家好，我是木瓜太香。大家在开发单页应用的时候，经常会遇到这样的需求，头部和尾部两个组件是大多数组件公用的，而中间的内容区域则是单独存在的，而且一般内容组件逻辑会比较多，如果我们不停刷新页面可能会出现尾部组件闪烁的问题。</p></blockquote><p>这个问题的出现主要是因为，内容区组件要比尾部组件大，而且尾部组件一般是没有什么逻辑的，相当于一个静态组件。</p><p>解决这个问题的思路就是想办法在页面最开始加载的时候隐藏尾部组件，之后再合适的时候将尾部组件显示出来即可。</p><p>说一下公司项目（VUE）中的解决办法，我们的思路是，先让尾部组件固定定位到页面外部，这样在最开始加载的时候就看不到尾部组件，然后我们通过监听路由变化来让组件显示，具体做法如下。</p><ol><li><p>定义类名 <code>.footer-fixed</code> 将该类名添加到 <code>footer</code> 组件上</p> <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.footer-fixed</span> &#123;</span><br><span class="line">  <span class="attribute">position</span>: fixed;</span><br><span class="line">  <span class="attribute">bottom</span>: -<span class="number">200px</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li><li><p>利用 vue 中的 watch 监听路由，恢复 <code>footer</code>组件的显示</p> <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$route: &#123;</span><br><span class="line">  handler () &#123; <span class="comment">// 组件加载完成之后将隐藏的底部显示出来</span></span><br><span class="line">     <span class="keyword">const</span> footerDom = <span class="built_in">document</span>.getElementsByClassName(<span class="string">&#x27;footer&#x27;</span>)[<span class="number">0</span>]</span><br><span class="line">     footerDom.classList.remove(<span class="string">&#x27;footer-fixed&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li></ol><p>当然你也可以使用路由的全局后置守卫做到同样的效果，不过我们当时考虑到的是逻辑相关性，所以才采用监控的方式。</p><p>更多前端技巧可以关注一下哔哩哔哩：木瓜太香</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> vue </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> js </tag>
+            
+            <tag> vue </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>webstorm中emmet展开a标签和行内元素不换行</title>
       <link href="/blog/2020/09/06/webstorm%E4%B8%ADemmet%E5%B1%95%E5%BC%80a%E6%A0%87%E7%AD%BE%E5%92%8C%E8%A1%8C%E5%86%85%E5%85%83%E7%B4%A0%E4%B8%8D%E6%8D%A2%E8%A1%8C/"/>
       <url>/blog/2020/09/06/webstorm%E4%B8%ADemmet%E5%B1%95%E5%BC%80a%E6%A0%87%E7%AD%BE%E5%92%8C%E8%A1%8C%E5%86%85%E5%85%83%E7%B4%A0%E4%B8%8D%E6%8D%A2%E8%A1%8C/</url>
