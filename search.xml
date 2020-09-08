@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>webstorm编写vue、react将大驼峰组件命名转换成短横杠命名</title>
+      <link href="/blog/2020/09/08/webstorm%E7%BC%96%E5%86%99vue%E3%80%81react%E5%B0%86%E5%A4%A7%E9%A9%BC%E5%B3%B0%E7%BB%84%E4%BB%B6%E5%91%BD%E5%90%8D%E8%BD%AC%E6%8D%A2%E6%88%90%E7%9F%AD%E6%A8%AA%E6%9D%A0%E5%91%BD%E5%90%8D/"/>
+      <url>/blog/2020/09/08/webstorm%E7%BC%96%E5%86%99vue%E3%80%81react%E5%B0%86%E5%A4%A7%E9%A9%BC%E5%B3%B0%E7%BB%84%E4%BB%B6%E5%91%BD%E5%90%8D%E8%BD%AC%E6%8D%A2%E6%88%90%E7%9F%AD%E6%A8%AA%E6%9D%A0%E5%91%BD%E5%90%8D/</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>大家好！我是木瓜太香，精通 webstorm 与常见前端技术的工程师，偶尔也在b站搞一些 webstorm 技巧教学，今天给大家带来的是大驼峰小驼峰快速转换短横杠命名或者下划线命名的方式。</p></blockquote><p>开发中我们可能会遇到一个这样的需求，我们在创建组件的时候习惯使用大驼峰命名，而在使用的时候，我们又要使用短横杠或者下划线命名，这种功能我们当然不可能手打的啦，这辈子都不可能的啦。</p><p>解决的办法一般比较容易想到的有两种，一种是直接使用插件实现，另一种则是使用宏命令来实现，两种都是可以完成这个操作的，只是第二种更加考验大家对 webstorm 的使用熟练度，所以今天我们先来讲讲这第一种，插件实现方式。</p><p>这里我们用到的插件名是 <code>String Manipulation</code> 我们在 webstorm 中安装该插件之后，重启 webstorm 就可以使用了。</p><p>使用的方式是对你想转换的字符串右键选中 String Manipulation | Switch Case | 这个路径下面有很多各种各样的选项，可以根据需要来转换。</p><p>当然鼠标操作，肯定以及一定还不够快捷，这个时候快捷键绑定就派上用场了，去快捷键绑定一下对应的命令吧，什么？还不会快捷键的绑定？那还不快去哔哩哔哩看木瓜太香的教程！！！</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> webstorm </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> webstorm </tag>
+            
+            <tag> vue </tag>
+            
+            <tag> react </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>vue组件加载闪烁问题</title>
       <link href="/blog/2020/09/07/vue%E7%BB%84%E4%BB%B6%E5%8A%A0%E8%BD%BD%E9%97%AA%E7%83%81%E9%97%AE%E9%A2%98/"/>
       <url>/blog/2020/09/07/vue%E7%BB%84%E4%BB%B6%E5%8A%A0%E8%BD%BD%E9%97%AA%E7%83%81%E9%97%AE%E9%A2%98/</url>
